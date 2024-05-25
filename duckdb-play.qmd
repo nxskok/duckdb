@@ -1,0 +1,30 @@
+play with duckdb and dbplyr
+
+```{r}
+library(tidyverse)
+library(duckdb)
+```
+
+turn mtcars into a database
+
+```{r}
+con <- dbConnect(duckdb())
+duckdb_register(con, "mt_cars", mtcars)
+```
+
+```{r}
+tbl(con, "mt_cars")
+```
+
+summarize using dbplyr
+
+```{r}
+tbl(con, "mt_cars") %>% 
+  group_by(cyl) %>% 
+  summarize(m = mean(wt)) -> summ
+```
+
+```{r}
+summ
+```
+
