@@ -9,7 +9,7 @@ turn mtcars into a database
 
 ```{r}
 con <- dbConnect(duckdb())
-duckdb_register(con, "mt_cars", mtcars)
+dbWriteTable(con, "mt_cars", mtcars)
 ```
 
 ```{r}
@@ -26,5 +26,34 @@ tbl(con, "mt_cars") %>%
 
 ```{r}
 summ
+```
+
+same thing, but save to a file
+
+```{r}
+con2 <- dbConnect(duckdb("mt_cars.db"))
+dbWriteTable(con2, "mt_cars", mtcars)
+tbl(con2, "mt_cars") %>% 
+  group_by(cyl) %>% 
+  summarize(mean_mpg = mean(mpg), 
+            sd_mpg = sd(mpg)) -> summ
+```
+
+```{r}
+summ %>% collect()
+```
+
+what about a plot?
+
+```{r}
+tbl(con2, "mt_cars") %>% 
+  ggplot(aes(x = wt, y = mpg)) + geom_point()
+```
+
+read from a file
+
+```{r}
+con3 <- dbConnect(duckdb("mt_cars.db", read_only = TRUE))
+tbl(con3, "mt_cars") 
 ```
 
