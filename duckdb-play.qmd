@@ -1,4 +1,27 @@
-play with duckdb and dbplyr
+play with duckdb and dbplyr 
+
+this seems to be consistent now:
+
+```{r}
+#| eval: false
+
+# start with an empty one and fill it from dataframe
+
+con <- dbConnect(duckdb()) 
+dbWriteTable(con, "mt_cars", mtcars)
+tbl(con, "mt_cars")
+
+# same but save to a file
+
+con2 <- dbConnect(duckdb("mt_cars.db"))
+dbWriteTable(con2, "mt_cars", mtcars)
+
+# read one from a file
+
+con3 <- dbConnect(duckdb("mt_cars.db", read_only = TRUE))
+tbl(con3, "mt_cars") 
+```
+
 
 ```{r}
 library(tidyverse)
@@ -13,10 +36,16 @@ dbWriteTable(con, "mt_cars", mtcars)
 ```
 
 ```{r}
-tbl(con, "mt_cars")
+tbl(con, "mt_cars") 
 ```
 
-summarize using dbplyr
+number of rows is unknown, but count them like this:
+
+```{r}
+tbl(con, "mt_cars") %>% count()
+```
+
+summarize using dbplyr (which is called automatically when needed)
 
 ```{r}
 tbl(con, "mt_cars") %>% 
@@ -28,11 +57,16 @@ tbl(con, "mt_cars") %>%
 summ
 ```
 
+```{r}
+summ %>% show_query()
+```
+
+
 same thing, but save to a file
 
 ```{r}
 con2 <- dbConnect(duckdb("mt_cars.db"))
-dbWriteTable(con2, "mt_cars", mtcars)
+dbWriteTable(con2, "mt_cars", mtcars, overwrite = TRUE) # recreate
 tbl(con2, "mt_cars") %>% 
   group_by(cyl) %>% 
   summarize(mean_mpg = mean(mpg), 
